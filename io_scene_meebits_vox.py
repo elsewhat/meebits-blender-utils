@@ -27,7 +27,7 @@ import struct
 bl_info = {
     "name": "Meebit (.vox)",
     "author": "Dagfinn Parnas based on technistguru/MagicaVoxel_Importer",
-    "version": (0, 7, 0),
+    "version": (0, 7, 1),
     "blender": (2, 80, 0),
     "location": "File > Import-Export",
     "description": "Import Meebit from .vox file",
@@ -88,6 +88,10 @@ class ImportVox(Operator, ImportHelper):
                             description = "Rig if there exist an armature with name 'MeebitArmature'",
                             default = True)
 
+    scale_meebit_armature: BoolProperty(name = "Scale Meebit armature to fit",
+                            description = "Scale armature dimension to fit meebit dimensions",
+                            default = True)                            
+
     #todo
     create_volume: BoolProperty(name = "Generate Volumes",
                                 description = "Create volume objects for volumetric voxels.",
@@ -126,9 +130,11 @@ class ImportVox(Operator, ImportHelper):
         
         layout.prop(self, "cleanup_mesh")
         layout.prop(self, "create_lights")
-        layout.prop(self, "join_meebit_armature")
-        #layout.prop(self, "create_volume")
         layout.prop(self, "organize")
+        layout.prop(self, "join_meebit_armature")
+        layout.prop(self, "scale_meebit_armature")
+        #layout.prop(self, "create_volume")
+        
 
 ################################################################################################################################################
 ################################################################################################################################################
@@ -175,7 +181,7 @@ class VoxelObject:
         
         return light_obj
     
-    def generate(self, file_name, vox_size, material_type, palette, materials, cleanup, collections,meebit_rig):
+    def generate(self, file_name, vox_size, material_type, palette, materials, cleanup, collections,meebit_rig,scale_meebit_rig):
         objects = []
         lights = []
         
@@ -369,6 +375,20 @@ class VoxelObject:
                 armature = bpy.data.objects['MeebitArmature'] 
                 print("Found meebit armature 'MeebitArmature'") 
                 
+                # Need to do scaling first
+                if scale_meebit_rig:
+                    print("Scaling armature to fit meebit dimensions") 
+                    # From https://blender.stackexchange.com/a/74496
+
+                    # Convert to world coordinates if you want to use world Y
+                    # We now use @ instead of * as per https://wiki.blender.org/wiki/Reference/Release_Notes/2.80/Python_API#Matrix_Multiplication
+                    objBound = obj.matrix_world.to_quaternion() @ obj.dimensions
+                    armBound = armature.matrix_world.to_quaternion() @ armature.dimensions
+
+                    ratio = abs(objBound.z)/ abs(armBound.z) 
+                    print("Scaling armature with ratio:", ratio)
+                    armature.scale *= ratio
+                
                 # From https://blender.stackexchange.com/a/103004
                 # https://docs.blender.org/api/current/bpy.ops.object.html#bpy.ops.object.parent_set
                 bpy.ops.object.select_all(action='DESELECT') #deselect all objects
@@ -376,7 +396,8 @@ class VoxelObject:
                 armature.select_set(True)
                 bpy.context.view_layer.objects.active = armature    #the active object will be the parent of all selected object
 
-                bpy.ops.object.parent_set(type='ARMATURE_AUTO', keep_transform=True)   
+                bpy.ops.object.parent_set(type='ARMATURE_AUTO', keep_transform=True)
+                
 
             else:
                 print("Found no meebit armature with name'MeebitArmature'") 
@@ -721,7 +742,7 @@ def import_vox(path, options):
     
     ### Generate Objects ###
     for model in models.values():
-        model.generate(file_name, options.voxel_size, options.material_type, palette, materials, options.cleanup_mesh, collections, options.join_meebit_armature)
+        model.generate(file_name, options.voxel_size, options.material_type, palette, materials, options.cleanup_mesh, collections, options.join_meebit_armature,options.scale_meebit_armature)
 
 ################################################################################################################################################
 
