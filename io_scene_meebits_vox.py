@@ -27,7 +27,7 @@ import struct
 bl_info = {
     "name": "Meebit (.vox)",
     "author": "Dagfinn Parnas based on technistguru/MagicaVoxel_Importer",
-    "version": (0, 7, 1),
+    "version": (0, 7, 2),
     "blender": (2, 80, 0),
     "location": "File > Import-Export",
     "description": "Import Meebit from .vox file",
@@ -106,7 +106,9 @@ class ImportVox(Operator, ImportHelper):
         paths = [os.path.join(self.directory, name.name) for name in self.files]
         if not paths:
             paths.append(self.filepath)
-        
+        # Must be in object mode
+        bpy.ops.object.mode_set(mode='OBJECT')
+
         for path in paths:
             import_vox(path, self)
         
