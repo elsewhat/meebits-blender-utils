@@ -27,12 +27,14 @@ With the add-on installed and enabled, the importer can be accessed from `File >
 
 This add-on offers several import options, seen on the file select menu of the import.
 
-![image](https://user-images.githubusercontent.com/1133607/118240495-5f7ead00-b49b-11eb-82a2-f0fbc4f3b6b6.png)
+![image](https://user-images.githubusercontent.com/1133607/118270744-bba7f800-b4c0-11eb-8a73-2fa744a98e72.png)
+
 
 Settings come from [technistguru/MagicaVoxel_Importer](https://github.com/technistguru/MagicaVoxel_Importer) and most of them will likely be removed in the future. 
 
 - *Voxel Size*: how large each voxel should be, in Blender Units. Default is 0.025 which gives a meebit height of 1.675 meters
-
+- *Rig with Meebit armature": If current scene has an armature with name MeebitArmature, it automatically joins them with automatic weights
+- *Scale Meebit armature to fit": Will scale the armature dimension to be the same as the meebits dimensions
 
 ## Questions and Concerns
 
