@@ -1,12 +1,9 @@
 # Meebits vox importer
 Blender import add-on for Meebits based on [MagicaVoxel `.vox` format](https://github.com/ephtracy/voxel-model/blob/master/MagicaVoxel-file-format-vox.txt)
 
-![image](https://user-images.githubusercontent.com/1133607/118179571-c2d5f400-b435-11eb-98be-3eeb58957717.png)
+![image](https://user-images.githubusercontent.com/1133607/118240998-ea5fa780-b49b-11eb-8090-6e48640d2211.png)
 
-
-![](https://img.shields.io/github/license/elsewhat/meebits-vox-importer)
-
-This is a fork of [RichysHub / MagicaVoxel-VOX-importer](https://github.com/RichysHub/MagicaVoxel-VOX-importer)
+This builds upon [technistguru/MagicaVoxel_Importer](https://github.com/technistguru/MagicaVoxel_Importer)
 
 ## Getting Started
 
@@ -30,14 +27,12 @@ With the add-on installed and enabled, the importer can be accessed from `File >
 
 This add-on offers several import options, seen on the file select menu of the import.
 
-![Import options](https://user-images.githubusercontent.com/1133607/118181589-37aa2d80-b438-11eb-90b2-ef1634d19277.png)
+![image](https://user-images.githubusercontent.com/1133607/118240495-5f7ead00-b49b-11eb-82a2-f0fbc4f3b6b6.png)
 
-- *Voxel Spacing*: controls distance center to center of neighbouring voxels.
-- *Voxel Size*: how large each voxel should be, in Blender Units.
-- *Gamma Correct Colors*: in order to reproduce colors in the render, colors in the palette are gamma corrected. Disabling this will likely cause discoloration compared to the model when viewed in MagicaVoxel.
-  - *Gamma Correction Value*: value of color correction, default of 2.2, see [here](https://docs.blender.org/manual/en/latest/render/color_management.html) for more information.
-- *Use Shadeless Materials*: makes materials 'shadeless' by changing the material type to emissive.
-- *Join Voxels*: Joins all voxel together into on model. If this is not selected, the meebit will consist of a few thousand individual cubes (perfect for physics simulations)
+Settings come from [technistguru/MagicaVoxel_Importer](https://github.com/technistguru/MagicaVoxel_Importer) and most of them will likely be removed in the future. 
+
+- *Voxel Size*: how large each voxel should be, in Blender Units. Default is 0.025 which gives a meebit height of 1.675 meters
+
 
 ## Questions and Concerns
 
