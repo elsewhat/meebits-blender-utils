@@ -1,6 +1,8 @@
 """
 This script imports Meebits VOX files to Blender.
-It is only possible as it can extend on https://github.com/RichysHub/MagicaVoxel-VOX-importer
+
+It uses code from the following repo under gpl 3.0 license.
+https://github.com/technistguru/MagicaVoxel_Importer
 
 Vox file format:
 https://github.com/ephtracy/voxel-model/blob/master/MagicaVoxel-file-format-vox.txt
@@ -9,6 +11,8 @@ https://github.com/ephtracy/voxel-model/blob/master/MagicaVoxel-file-format-vox-
 Usage:
 Run this script from "File->Import" menu and then load the desired VOX file.
 """
+
+# Debug tips. Shift+F4 for python console .  obj = bpy.data.objects['meebit_16734_t'] to get object
 
 import os
 
@@ -21,23 +25,25 @@ from bpy.types import Operator
 import struct
 
 bl_info = {
-    "name": "MagicaVoxel VOX Importer",
-    "author": "TechnistGuru",
-    "version": (1, 2, 0),
+    "name": "Meebit (.vox)",
+    "author": "Dagfinn Parnas based on technistguru/MagicaVoxel_Importer",
+    "version": (0, 6, 0),
     "blender": (2, 80, 0),
     "location": "File > Import-Export",
-    "description": "Import MagicaVoxel .vox files",
-    "wiki_url": "https://github.com/technistguru/MagicaVoxel_Importer",
+    "description": "Import Meebit from .vox file",
+    "warning": "",
+    "wiki_url": "",
+    "support": 'TESTING',
     "category": "Import-Export"}
 
 
 class ImportVox(Operator, ImportHelper):
-    bl_idname = "import_scene.vox"
-    bl_label = "Import Vox"
+    bl_idname = "import_meebit.vox"
+    bl_label = "Import meebit"
     bl_options = {'PRESET', 'UNDO'}
     
     files: CollectionProperty(name="File Path",
-                              description="File path used for importing the VOX file",
+                              description="File path used for importing the meebit .vox file",
                               type=bpy.types.OperatorFileListElement) 
 
     directory: StringProperty()
@@ -50,7 +56,7 @@ class ImportVox(Operator, ImportHelper):
 
     voxel_size: FloatProperty(name = "Voxel Size",
                                 description = "Side length, in blender units, of each voxel.",
-                                default=1.0)
+                                default=0.025)
     
     material_type: EnumProperty(name = "",
                                 description = "How color and material data is imported",
@@ -60,7 +66,7 @@ class ImportVox(Operator, ImportHelper):
                                     ('VertCol', 'Vertex Colors', "Create one material and store color and material data in vertex colors."),
                                     ('Tex', 'Textures', "Generates textures to store color and material data.")
                                 ),
-                                default = 'SepMat')
+                                default = 'Tex')
 
     gamma_correct: BoolProperty(name = "Gamma Correct Colors",
                                 description = "Changes the gamma of colors to look closer to how they look in MagicaVoxel. Only applies if Palette Import Method is Seperate Materials.",
@@ -68,7 +74,7 @@ class ImportVox(Operator, ImportHelper):
     gamma_value: FloatProperty(name = "Gamma Correction Value",
                                 default=2.2, min=0)
     
-    override_materials: BoolProperty(name = "Override Existing Materials", default = True)
+    override_materials: BoolProperty(name = "Override Existing Materials", default = False)
     
     cleanup_mesh: BoolProperty(name = "Cleanup Mesh",
                                 description = "Merge overlapping verticies and recalculate normals.",
@@ -326,9 +332,16 @@ class VoxelObject:
         
         # Sets the origin of object to be the same as in MagicaVoxel so that its location can be set correctly.
         bpy.context.scene.cursor.location = [0, 0, 0]
-        obj.location = [int(-self.size.x/2), int(-self.size.y/2), int(-self.size.z/2)]
-        bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
+        # Meebit - Set location
+        obj.location = [-self.size.x/2.0, -self.size.y/2.0, -self.size.z/2.0]
         
+        # Meebit - Set origin to prepare for rigging
+        bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='BOUNDS')
+        # bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
+        
+        # Meebit - attempt to set location
+        obj.location.z += vox_size*obj.dimensions.z/2.0
+
         for light in lights:
             light.parent = obj  # Parent Lights to Object
             x, y, z = light.location  # Fix Location
@@ -691,7 +704,7 @@ def import_vox(path, options):
 ################################################################################################################################################
 
 def menu_func_import(self, context):
-    self.layout.operator(ImportVox.bl_idname, text="MagicaVoxel (.vox)")
+    self.layout.operator(ImportVox.bl_idname, text="Meebit (.vox)")
 
 def register():
     bpy.utils.register_class(ImportVox)
