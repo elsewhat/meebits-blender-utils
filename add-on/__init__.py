@@ -13,8 +13,16 @@ bl_info = {
 
 if "bpy" in locals():
     import importlib
-    if "import_meebit" in locals():
-        importlib.reload(import_meebit)
+    if "meebit_core" in locals():
+        importlib.reload(meebit_core)
+
+
+# Responsibility
+# - Defines a python package
+# - Registers the ImportMeebit via register()
+# - ImportMeebit defines the user interface of the import and the user exposed options
+# - ImportMeebit.execute() triggers the import through meebit_core.import
+
 
 
 import os
@@ -27,6 +35,20 @@ from bpy.types import Operator
 
 import struct
 
+"""
+This imports Meebits VOX files to Blender.
+
+It uses code from the following repo under gpl 3.0 license.
+https://github.com/technistguru/MagicaVoxel_Importer
+
+Vox file format:
+https://github.com/ephtracy/voxel-model/blob/master/MagicaVoxel-file-format-vox.txt
+https://github.com/ephtracy/voxel-model/blob/master/MagicaVoxel-file-format-vox-extension.txt
+
+Usage:
+Import add-on via Edit-Preferences
+Run from "File->Import" menu and then select meebit .vox file
+"""
 class ImportMeebit(Operator, ImportHelper):
     bl_idname = "import_meebit.vox"
     bl_label = "Import meebit"
@@ -93,16 +115,22 @@ class ImportMeebit(Operator, ImportHelper):
     
 
     def execute(self, context):
-        from . import import_meebit
+        from . import meebit_core
 
         paths = [os.path.join(self.directory, name.name) for name in self.files]
         if not paths:
             paths.append(self.filepath)
+        
         # Must be in object mode
-        bpy.ops.object.mode_set(mode='OBJECT')
+        try:
+            bpy.ops.object.mode_set(mode='OBJECT')
+        except:
+            print("Failed to set object mode. Continuing")
+            pass
+        
 
         for path in paths:
-            import_meebit.load(path, self)
+            meebit_core.import_meebit_vox(path, self)
         
         return {"FINISHED"}
     

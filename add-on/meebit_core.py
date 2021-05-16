@@ -1,3 +1,19 @@
+"""
+This script imports Meebits VOX files to Blender.
+
+It uses code from the following repo under gpl 3.0 license.
+https://github.com/technistguru/MagicaVoxel_Importer
+
+Vox file format:
+https://github.com/ephtracy/voxel-model/blob/master/MagicaVoxel-file-format-vox.txt
+https://github.com/ephtracy/voxel-model/blob/master/MagicaVoxel-file-format-vox-extension.txt
+
+Usage:
+Run this script from "File->Import" menu and then load the desired VOX file.
+"""
+
+# Debug tips. Shift+F4 for python console .  obj = bpy.data.objects['meebit_16734_t'] to get object
+
 import os
 
 import bpy
@@ -8,13 +24,14 @@ from bpy.types import Operator
 
 import struct
 
+     
 class Vec3:
     def __init__(self, X, Y, Z):
         self.x, self.y, self.z = X, Y, Z
     
     def _index(self):
         return self.x + self.y*256 + self.z*256*256
-    
+
 class VoxelObject:
     def __init__(self, Voxels, Size):
         self.size = Size
@@ -212,6 +229,7 @@ class VoxelObject:
         
         # Sets the origin of object to be the same as in MagicaVoxel so that its location can be set correctly.
         bpy.context.scene.cursor.location = [0, 0, 0]
+
         # Meebit - Set location
         obj.location = [-self.size.x/2.0, -self.size.y/2.0, -self.size.z/2.0]
         
@@ -304,7 +322,7 @@ def read_dict(content):
     
     return dict
 
-def import_vox(path, options):
+def import_meebit_vox(path, options):
     
     with open(path, 'rb') as file:
         file_name = os.path.basename(file.name).replace('.vox', '')
@@ -429,7 +447,8 @@ def import_vox(path, options):
                         
                         
     
-    ### Import Options ###   
+    ### Import Options ###
+    
     gamma_value = options.gamma_value
     if not options.gamma_correct:
         gamma_value = 1
@@ -611,7 +630,3 @@ def import_vox(path, options):
     ### Generate Objects ###
     for model in models.values():
         model.generate(file_name, options.voxel_size, options.material_type, palette, materials, options.cleanup_mesh, collections, options.join_meebit_armature,options.scale_meebit_armature)
-
-
-class MeebitImportOption(object):
-    pass
