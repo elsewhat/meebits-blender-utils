@@ -19,8 +19,9 @@ import code
 import bpy
 
 import struct
-print(sys.path)
-print(sys.executable)
+# Debug python loading modules
+# print(sys.path)
+# print(sys.executable)
 
 # Add data path where the scene was loaded to 
 blend_dir = os.path.dirname(bpy.data.filepath)
