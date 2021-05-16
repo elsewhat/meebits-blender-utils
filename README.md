@@ -10,13 +10,12 @@ This builds upon [technistguru/MagicaVoxel_Importer](https://github.com/technist
 ### Installation
 
 This add-on needs to be installed into Blender in order to be used.
+The add-on to be installed is in the [`meebit-blender-add-on.zip`](meebit-blender-add-on.zip) file.
 Directions for this process can be found [here](https://docs.blender.org/manual/en/latest/editors/preferences/addons.html#rd-party-add-ons) directly from the Blender Documentation.
 
-Only [`io_scene_meebits_vox.py`](io_scene_meebits_vox.py) need be installed, other files in this repository are not functionally required.
-
 **Note:** in order to enable the add-on, you will need to have `Testing` add-ons visible within the Blender Preferences menu.
+![Enabling Add-on in Prefernces](https://user-images.githubusercontent.com/1133607/118412639-6411b400-b69b-11eb-9e1a-042ba46d388c.png)
 
-![Enabling Add-on in Prefernces](https://user-images.githubusercontent.com/1133607/118179489-a89c1600-b435-11eb-9664-fd3f51c744a2.png)
 
 
 ### Usage
