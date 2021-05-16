@@ -5,7 +5,7 @@ It uses code from the following repo under gpl 3.0 license.
 https://github.com/technistguru/MagicaVoxel_Importer
 
 Usage:
-blender MeebitRig.blend --background --python meebits_import_to_scene.py -- --meebit C:\crypto\meebits\14544\meebit_14544_t.vox
+blender MeebitRig.blend --background --python meebit_export_to_fbx.py -- --meebit E:\meebits\14544\meebit_14544_t.vox
 """
 
 # Debug tips. Shift+F4 for python console .  obj = bpy.data.objects['meebit_16734_t'] to get object
@@ -17,10 +17,6 @@ import code
 
 
 import bpy
-import bmesh
-from bpy_extras.io_utils import ImportHelper
-from bpy.props import StringProperty, IntProperty, FloatProperty, BoolProperty, CollectionProperty, EnumProperty
-from bpy.types import Operator
 
 import struct
 print(sys.path)
@@ -31,9 +27,11 @@ blend_dir = os.path.dirname(bpy.data.filepath)
 if blend_dir not in sys.path:
    sys.path.append(blend_dir)
 
-code.interact(local=locals())
 
-from  meebit.meebit_core import import_vox, MeebitImporter
+# Dev tips - Trigger interactive console 
+#code.interact(local=locals())
+
+from meebit_core import import_meebit_vox
 
 
 # Argument parser from https://blender.stackexchange.com/a/6844
@@ -112,12 +110,11 @@ options.scale_meebit_armature= True
 options.organize=True
 options.create_volume=False
 
-importer = MeebitImporter()
-import_vox(meebitPath,options)
+import_meebit_vox(meebitPath,options)
 
 # Attempt to export all objects
 objects = bpy.context.scene.objects
 
 bpy.ops.object.select_all(action='SELECT')
 
-bpy.ops.export_scene.fbx(filepath='test.fbx', use_selection=True)
+bpy.ops.export_scene.fbx(filepath='meebit.fbx', use_selection=True)
