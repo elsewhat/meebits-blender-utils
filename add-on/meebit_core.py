@@ -1,18 +1,4 @@
-"""
-This script meebits to a blender scene 
-
-It uses code from the following repo under gpl 3.0 license.
-https://github.com/technistguru/MagicaVoxel_Importer
-
-Usage:
-blender MeebitRig.blend --background --python meebits_import_to_scene.py -- --meebit C:\crypto\meebits\14544\meebit_14544_t.vox
-"""
-
-# Debug tips. Shift+F4 for python console .  obj = bpy.data.objects['meebit_16734_t'] to get object
-
 import os
-import sys
-import argparse
 
 import bpy
 import bmesh
@@ -22,130 +8,13 @@ from bpy.types import Operator
 
 import struct
 
-bl_info = {
-    "name": "Meebit (.vox)",
-    "author": "Dagfinn Parnas based on technistguru/MagicaVoxel_Importer",
-    "version": (0, 7, 2),
-    "blender": (2, 80, 0),
-    "location": "File > Import-Export",
-    "description": "Import Meebit from .vox file",
-    "warning": "",
-    "wiki_url": "",
-    "support": 'TESTING',
-    "category": "Import-Export"}
-
-
-class MeebitImporter():
-    bl_idname = "import_meebit.vox"
-    bl_label = "Import meebit"
-    bl_options = {'PRESET', 'UNDO'}
-    
-    files: CollectionProperty(name="File Path",
-                              description="File path used for importing the meebit .vox file",
-                              type=bpy.types.OperatorFileListElement) 
-
-    directory: StringProperty()
-    
-    filename_ext = ".vox"
-    filter_glob: StringProperty(
-        default="*.vox",
-        options={'HIDDEN'},
-    )
-
-    voxel_size: FloatProperty(name = "Voxel Size",
-                                description = "Side length, in blender units, of each voxel.",
-                                default=0.025)
-    
-    material_type: EnumProperty(name = "",
-                                description = "How color and material data is imported",
-                                items = (
-                                    ('None', 'None', "Don't import palette."),
-                                    ('SepMat', 'Separate Materials', "Create a material for each palette color."),
-                                    ('VertCol', 'Vertex Colors', "Create one material and store color and material data in vertex colors."),
-                                    ('Tex', 'Textures', "Generates textures to store color and material data.")
-                                ),
-                                default = 'Tex')
-
-    gamma_correct: BoolProperty(name = "Gamma Correct Colors",
-                                description = "Changes the gamma of colors to look closer to how they look in MagicaVoxel. Only applies if Palette Import Method is Seperate Materials.",
-                                default = True)
-    gamma_value: FloatProperty(name = "Gamma Correction Value",
-                                default=2.2, min=0)
-    
-    override_materials: BoolProperty(name = "Override Existing Materials", default = False)
-    
-    cleanup_mesh: BoolProperty(name = "Cleanup Mesh",
-                                description = "Merge overlapping verticies and recalculate normals.",
-                                default = True)
-    
-    create_lights: BoolProperty(name = "Add Point Lights",
-                                description = "Add point lights at emissive voxels for Eevee.",
-                                default = False)
-    
-    join_meebit_armature: BoolProperty(name = "Rig with Meebit armature",
-                            description = "Rig if there exist an armature with name 'MeebitArmature'",
-                            default = True)
-
-    scale_meebit_armature: BoolProperty(name = "Scale Meebit armature to fit",
-                            description = "Scale armature dimension to fit meebit dimensions",
-                            default = True)                            
-
-    #todo
-    create_volume: BoolProperty(name = "Generate Volumes",
-                                description = "Create volume objects for volumetric voxels.",
-                                default = False)
-    
-    organize: BoolProperty(name = "Organize Objects",
-                            description = "Organize objects into collections.",
-                            default = True)
-    
-
-    def execute(self, context):
-        paths = [os.path.join(self.directory, name.name) for name in self.files]
-        if not paths:
-            paths.append(self.filepath)
-        # Must be in object mode
-        bpy.ops.object.mode_set(mode='OBJECT')
-
-        for path in paths:
-            import_vox(path, self)
-        
-        return {"FINISHED"}
-    
-    def draw(self, context):
-        layout = self.layout
-        
-        layout.prop(self, "voxel_size")
-        
-        material_type = layout.column(align=True)
-        material_type.label(text = "Palette Import Method:")
-        material_type.prop(self, "material_type")
-        
-        if self.material_type == 'SepMat':
-            layout.prop(self, "gamma_correct")
-            if self.gamma_correct:
-                layout.prop(self, "gamma_value")
-        if self.material_type != 'None':
-            layout.prop(self, "override_materials")
-        
-        layout.prop(self, "cleanup_mesh")
-        layout.prop(self, "create_lights")
-        layout.prop(self, "organize")
-        layout.prop(self, "join_meebit_armature")
-        layout.prop(self, "scale_meebit_armature")
-        #layout.prop(self, "create_volume")
-        
-
-################################################################################################################################################
-################################################################################################################################################
-
 class Vec3:
     def __init__(self, X, Y, Z):
         self.x, self.y, self.z = X, Y, Z
     
     def _index(self):
         return self.x + self.y*256 + self.z*256*256
-
+    
 class VoxelObject:
     def __init__(self, Voxels, Size):
         self.size = Size
@@ -560,8 +429,7 @@ def import_vox(path, options):
                         
                         
     
-    ### Import Options ###
-    
+    ### Import Options ###   
     gamma_value = options.gamma_value
     if not options.gamma_correct:
         gamma_value = 1
@@ -744,88 +612,6 @@ def import_vox(path, options):
     for model in models.values():
         model.generate(file_name, options.voxel_size, options.material_type, palette, materials, options.cleanup_mesh, collections, options.join_meebit_armature,options.scale_meebit_armature)
 
-# Argument parser from https://blender.stackexchange.com/a/6844
-class ArgumentParserForBlender(argparse.ArgumentParser):
-    """
-    This class is identical to its superclass, except for the parse_args
-    method (see docstring). It resolves the ambiguity generated when calling
-    Blender from the CLI with a python script, and both Blender and the script
-    have arguments. E.g., the following call will make Blender crash because
-    it will try to process the script's -a and -b flags:
-    >>> blender --python my_script.py -a 1 -b 2
-
-    To bypass this issue this class uses the fact that Blender will ignore all
-    arguments given after a double-dash ('--'). The approach is that all
-    arguments before '--' go to Blender, arguments after go to the script.
-    The following calls work fine:
-    >>> blender --python my_script.py -- -a 1 -b 2
-    >>> blender --python my_script.py --
-    """
-
-    def _get_argv_after_doubledash(self):
-        """
-        Given the sys.argv as a list of strings, this method returns the
-        sublist right after the '--' element (if present, otherwise returns
-        an empty list).
-        """
-        try:
-            idx = sys.argv.index("--")
-            return sys.argv[idx+1:] # the list after '--'
-        except ValueError as e: # '--' not in the list:
-            return []
-
-    # overrides superclass
-    def parse_args(self):
-        """
-        This method is expected to behave identically as in the superclass,
-        except that the sys.argv list will be pre-processed using
-        _get_argv_after_doubledash before. See the docstring of the class for
-        usage examples and details.
-        """
-        return super().parse_args(args=self._get_argv_after_doubledash())
 
 class MeebitImportOption(object):
     pass
-
-
-
-parser = ArgumentParserForBlender()
-
-
-#parser.add_argument("-q", "--quack",
-#                    action="store_true",
-#                    help="Quacks bar times if activated.")
-
-parser.add_argument("-m", "--meebit",
-                    action="store",
-                    help="Meebit .vox file in t-pose",
-                    required=True)
-
-args = parser.parse_args()
-meebitPath = args.meebit
-
-print("Meebit import to scene script")
-print(meebitPath)
-
-options=MeebitImportOption()
-options.voxel_size=.025
-options.material_type='Tex'
-options.gamma_correct= True
-options.gamma_value= 2.2
-options.override_materials = False
-options.cleanup_mesh=True
-options.create_lights=False
-options.join_meebit_armature=True
-options.scale_meebit_armature= True
-options.organize=True
-options.create_volume=False
-
-importer = MeebitImporter()
-import_vox(meebitPath,options)
-
-# Attempt to export all objects
-objects = bpy.context.scene.objects
-
-bpy.ops.object.select_all(action='SELECT')
-
-bpy.ops.export_scene.fbx(filepath='test.fbx', use_selection=True)

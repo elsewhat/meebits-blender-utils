@@ -24,110 +24,6 @@ from bpy.types import Operator
 
 import struct
 
-
-
-
-class ImportVox(Operator, ImportHelper):
-    bl_idname = "import_meebit.vox"
-    bl_label = "Import meebit"
-    bl_options = {'PRESET', 'UNDO'}
-    
-    files: CollectionProperty(name="File Path",
-                              description="File path used for importing the meebit .vox file",
-                              type=bpy.types.OperatorFileListElement) 
-
-    directory: StringProperty()
-    
-    filename_ext = ".vox"
-    filter_glob: StringProperty(
-        default="*.vox",
-        options={'HIDDEN'},
-    )
-
-    voxel_size: FloatProperty(name = "Voxel Size",
-                                description = "Side length, in blender units, of each voxel.",
-                                default=0.025)
-    
-    material_type: EnumProperty(name = "",
-                                description = "How color and material data is imported",
-                                items = (
-                                    ('None', 'None', "Don't import palette."),
-                                    ('SepMat', 'Separate Materials', "Create a material for each palette color."),
-                                    ('VertCol', 'Vertex Colors', "Create one material and store color and material data in vertex colors."),
-                                    ('Tex', 'Textures', "Generates textures to store color and material data.")
-                                ),
-                                default = 'Tex')
-
-    gamma_correct: BoolProperty(name = "Gamma Correct Colors",
-                                description = "Changes the gamma of colors to look closer to how they look in MagicaVoxel. Only applies if Palette Import Method is Seperate Materials.",
-                                default = True)
-    gamma_value: FloatProperty(name = "Gamma Correction Value",
-                                default=2.2, min=0)
-    
-    override_materials: BoolProperty(name = "Override Existing Materials", default = False)
-    
-    cleanup_mesh: BoolProperty(name = "Cleanup Mesh",
-                                description = "Merge overlapping verticies and recalculate normals.",
-                                default = True)
-    
-    create_lights: BoolProperty(name = "Add Point Lights",
-                                description = "Add point lights at emissive voxels for Eevee.",
-                                default = False)
-    
-    join_meebit_armature: BoolProperty(name = "Rig with Meebit armature",
-                            description = "Rig if there exist an armature with name 'MeebitArmature'",
-                            default = True)
-
-    scale_meebit_armature: BoolProperty(name = "Scale Meebit armature to fit",
-                            description = "Scale armature dimension to fit meebit dimensions",
-                            default = True)                            
-
-    #todo
-    create_volume: BoolProperty(name = "Generate Volumes",
-                                description = "Create volume objects for volumetric voxels.",
-                                default = False)
-    
-    organize: BoolProperty(name = "Organize Objects",
-                            description = "Organize objects into collections.",
-                            default = True)
-    
-
-    def execute(self, context):
-        paths = [os.path.join(self.directory, name.name) for name in self.files]
-        if not paths:
-            paths.append(self.filepath)
-        # Must be in object mode
-        bpy.ops.object.mode_set(mode='OBJECT')
-
-        for path in paths:
-            import_vox(path, self)
-        
-        return {"FINISHED"}
-    
-    def draw(self, context):
-        layout = self.layout
-        
-        layout.prop(self, "voxel_size")
-        
-        material_type = layout.column(align=True)
-        material_type.label(text = "Palette Import Method:")
-        material_type.prop(self, "material_type")
-        
-        if self.material_type == 'SepMat':
-            layout.prop(self, "gamma_correct")
-            if self.gamma_correct:
-                layout.prop(self, "gamma_value")
-        if self.material_type != 'None':
-            layout.prop(self, "override_materials")
-        
-        layout.prop(self, "cleanup_mesh")
-        layout.prop(self, "create_lights")
-        layout.prop(self, "organize")
-        layout.prop(self, "join_meebit_armature")
-        layout.prop(self, "scale_meebit_armature")
-        #layout.prop(self, "create_volume")
-        
-
 ################################################################################################################################################
 ################################################################################################################################################
 
@@ -427,7 +323,7 @@ def read_dict(content):
     
     return dict
 
-def import_vox(path, options):
+def load(path, options):
     
     with open(path, 'rb') as file:
         file_name = os.path.basename(file.name).replace('.vox', '')
@@ -738,17 +634,3 @@ def import_vox(path, options):
 
 ################################################################################################################################################
 
-def menu_func_import(self, context):
-    self.layout.operator(ImportVox.bl_idname, text="Meebit (.vox)")
-
-def register():
-    bpy.utils.register_class(ImportVox)
-    bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
-
-def unregister():
-    bpy.utils.unregister_class(ImportVox)
-    bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
-
-
-if __name__ == "__main__":
-    register()
