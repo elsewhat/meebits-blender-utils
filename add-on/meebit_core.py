@@ -57,7 +57,7 @@ class VoxelObject:
         return True
     
     # TODO: Refactor this central method
-    def generate(self, file_name, vox_size, material_type, palette, materials, cleanup, collections,meebit_rig,scale_meebit_rig):
+    def generate(self, file_name, vox_size, material_type, palette, materials, cleanup, collections,meebit_rig,scale_meebit_rig,shade_smooth_meebit):
         objects = []
         lights = []
         
@@ -239,6 +239,14 @@ class VoxelObject:
         bpy.ops.transform.translate(value=(self.position.x*vox_size, self.position.y*vox_size, self.position.z*vox_size))
         bpy.ops.transform.resize(value=(vox_size, vox_size, vox_size))
         
+        if shade_smooth_meebit:
+            print("Applying shade smooth")
+            # Each faces must be smooth shaded https://blender.stackexchange.com/a/91687
+            mesh = obj.data
+            obj.data.use_auto_smooth = 1
+            for f in mesh.polygons:
+                f.use_smooth = True
+
         # Cleanup Mesh
         if cleanup:
             bpy.ops.object.editmode_toggle()
@@ -619,4 +627,4 @@ def import_meebit_vox(path, options):
     
     ### Generate Objects ###
     for model in models.values():
-        model.generate(file_name, options.voxel_size, options.material_type, palette, materials, options.cleanup_mesh, collections, options.join_meebit_armature,options.scale_meebit_armature)
+        model.generate(file_name, options.voxel_size, options.material_type, palette, materials, options.cleanup_mesh, collections, options.join_meebit_armature,options.scale_meebit_armature,options.shade_smooth_meebit)

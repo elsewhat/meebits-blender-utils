@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Meebit (.vox)",
     "author": "Dagfinn Parnas based on technistguru/MagicaVoxel_Importer",
-    "version": (0, 8, 0),
+    "version": (0, 8, 1),
     "blender": (2, 80, 0),
     "location": "File > Import-Export",
     "description": "Import Meebit from .vox file",
@@ -104,6 +104,10 @@ class ImportMeebit(Operator, ImportHelper):
                             description = "Scale armature dimension to fit meebit dimensions",
                             default = True)                            
 
+    shade_smooth_meebit: BoolProperty(name = "Shade smooth",
+                            description = "Shade smooth set for meebit",
+                            default = True)   
+
     #todo
     create_volume: BoolProperty(name = "Generate Volumes",
                                 description = "Create volume objects for volumetric voxels.",
@@ -155,6 +159,7 @@ class ImportMeebit(Operator, ImportHelper):
         layout.prop(self, "organize")
         layout.prop(self, "join_meebit_armature")
         layout.prop(self, "scale_meebit_armature")
+        layout.prop(self, "shade_smooth_meebit")
         #layout.prop(self, "create_volume")
         
 
