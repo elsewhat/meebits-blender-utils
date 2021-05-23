@@ -3,8 +3,6 @@ Blender import add-on for Meebits based on [MagicaVoxel `.vox` format](https://g
 
 ![image](https://user-images.githubusercontent.com/1133607/118240998-ea5fa780-b49b-11eb-8090-6e48640d2211.png)
 
-This builds upon [technistguru/MagicaVoxel_Importer](https://github.com/technistguru/MagicaVoxel_Importer)
-
 ## Getting Started
 
 ### Installation
@@ -16,31 +14,31 @@ Directions for this process can be found [here](https://docs.blender.org/manual/
 **Note:** in order to enable the add-on, you will need to have `Testing` add-ons visible within the Blender Preferences menu.
 ![Enabling Add-on in Prefernces](https://user-images.githubusercontent.com/1133607/118412639-6411b400-b69b-11eb-9e1a-042ba46d388c.png)
 
-
-
 ### Usage
-
 With the add-on installed and enabled, the importer can be accessed from `File > Import > Meebit (.vox)`
 
 ### Import options
-
 This add-on offers several import options, seen on the file select menu of the import.
 
-![image](https://user-images.githubusercontent.com/1133607/118270744-bba7f800-b4c0-11eb-8a73-2fa744a98e72.png)
+![image](https://user-images.githubusercontent.com/1133607/119262939-4aadc200-bbdd-11eb-8ad7-f684d8dda422.png)
 
+The following settings are available:
+*Optimize scene import for*
+- *Blender scene rendering* - The imported model will have separate materials for each colored voxel. This allows blender users to easily change each materials properties, for example to make sunshades reflective
+- *VRM Export (beta)* - The imported model will be optimized for usage as 3D avatar in the metaverse and the VRM file format. Model will have a single texture.
 
-Settings come from [technistguru/MagicaVoxel_Importer](https://github.com/technistguru/MagicaVoxel_Importer) and most of them will likely be removed in the future. 
-
-- *Voxel Size*: how large each voxel should be, in Blender Units. Default is 0.025 which gives a meebit height of 1.675 meters
+*Advanced options* 
 - *Rig with Meebit armature": If current scene has an armature with name MeebitArmature, it automatically joins them with automatic weights
-- *Scale Meebit armature to fit": Will scale the armature dimension to be the same as the meebits dimensions
+- *Scale Meebit armature to fit*: Will scale the armature dimension to be the same as the meebits dimensions
+- *Shade smooth*: Improve shading of model
+- *Override materials if they exist*: The VRM Export creates a couple of materials which are named based on the original file name of the import. This option overrides the materials if they already exist in the blender scene.
 
 ## Questions and Concerns
-
-If in using this add-on you encounter difficulties, be sure to check [the issues](), in case a solution has been outlined there. If not, then issues are welcomed.
+Report issues in Github or raise them in the MeebitsDAO discord.
 
 ## Changelog and Versioning
+v0.9.0 - Improved import dialog
 
 ## License
-
+This project would not be possible without [technistguru/MagicaVoxel_Importer](https://github.com/technistguru/MagicaVoxel_Importer).
 This project is licensed under the GPL v3.0 License - see the [LICENSE](LICENSE) file for details
