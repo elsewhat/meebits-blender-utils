@@ -322,6 +322,11 @@ def read_dict(content):
 
 def import_meebit_vox(path, options):
     
+    if options.optimize_import_for_type == 'Blender':
+        options.material_type = 'SepMat'
+    elif options.optimize_import_for_type == 'VRM':
+        options.material_type = 'Tex'
+
     with open(path, 'rb') as file:
         file_name = os.path.basename(file.name).replace('.vox', '')
         file_size = os.path.getsize(path)
@@ -585,6 +590,15 @@ def import_meebit_vox(path, options):
             links.new(col_tex.outputs["Color"], bsdf.inputs["Emission"])
             links.new(mat_tex.outputs["Alpha"], multiply.inputs[0])
             links.new(multiply.outputs[0], bsdf.inputs["Emission Strength"])
+
+            # Meebit - Pack these images so that they're part of the blender scene and not lost on reopen
+            # https://github.com/elsewhat/meebits-blender-utils/issues/10
+            # https://blender.stackexchange.com/questions/142888/how-to-pack-data-into-blend-with-bpy-data-libraries-write
+            print("Packing image " + name + '_col' + " into blender file")
+            bpy.data.images[name + '_col'].pack()
+            print("Packing image " + name + '_mat' + " into blender file")
+            # This does not have the effect we want as it loose data on persistence 
+            bpy.data.images[name + '_mat'].pack()
     
     
     ### Apply Transforms ##
