@@ -16,9 +16,11 @@ Directions for this process can be found [here](https://docs.blender.org/manual/
 
 ### Usage
 With the add-on installed and enabled, the importer can be accessed from `File > Import > Meebit (.vox)`
+To automatically add rigging, open the supplied Blender scene MeebitRig.blend as your first step.
 
 ### Import options
-This add-on offers several import options, seen on the file select menu of the import.
+This dd-on offers several import options, seen on the file select menu of the import.
+
 
 ![image](https://user-images.githubusercontent.com/1133607/119262939-4aadc200-bbdd-11eb-8ad7-f684d8dda422.png)
 
@@ -28,7 +30,7 @@ The following settings are available:
 - *VRM Export (beta)* - The imported model will be optimized for usage as 3D avatar in the metaverse and the VRM file format. Model will have a single texture.
 
 *Advanced options* 
-- *Rig with Meebit armature": If current scene has an armature with name MeebitArmature, it automatically joins them with automatic weights
+- *Rig with Meebit armature*: If current scene has an armature with name MeebitArmature, it automatically joins them with automatic weights
 - *Scale Meebit armature to fit*: Will scale the armature dimension to be the same as the meebits dimensions
 - *Shade smooth*: Improve shading of model
 - *Override materials if they exist*: The VRM Export creates a couple of materials which are named based on the original file name of the import. This option overrides the materials if they already exist in the blender scene.
