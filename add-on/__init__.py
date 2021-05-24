@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Meebit (.vox)",
     "author": "Dagfinn Parnas based on technistguru/MagicaVoxel_Importer",
-    "version": (0, 9, 0),
+    "version": (0, 9, 1),
     "blender": (2, 80, 0),
     "location": "File > Import-Export",
     "description": "Import Meebit from .vox file",
@@ -86,7 +86,11 @@ class ImportMeebit(Operator, ImportHelper):
 
     shade_smooth_meebit: BoolProperty(name = "Shade smooth",
                             description = "Shade smooth set for meebit",
-                            default = True)   
+                            default = True)
+
+    mtoon_shader: BoolProperty(name = "Set shader 'MToon_unversioned'",
+                            description = "Automatically set a shader which can be used for VRM format",
+                            default = True)                               
 
     override_materials: BoolProperty(name = "Override materials if they exist", default = False)                            
 
@@ -186,6 +190,9 @@ class ImportMeebit(Operator, ImportHelper):
         box = layout.box()
         box.label(text="Advanced options", icon='MODIFIER_OFF')    
         secondary_options = box.column(align=True)
+
+        if self.optimize_import_for_type == 'VRM': 
+            secondary_options.prop(self, "mtoon_shader")
 
         secondary_options.prop(self, "join_meebit_armature")
         if self.join_meebit_armature:
