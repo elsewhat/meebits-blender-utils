@@ -599,6 +599,51 @@ def import_meebit_vox(path, options):
             print("Packing image " + name + '_mat' + " into blender file")
             # This does not have the effect we want as it loose data on persistence 
             bpy.data.images[name + '_mat'].pack()
+
+        # Ref https://github.com/elsewhat/meebits-blender-utils/issues/12
+        # Might have done this whilst creating the material as well. But now if this fails, the default material should be ok
+        if options.mtoon_shader:
+            print("Applying MToon_unversioned shader to meebit material")
+
+            shader_node_group_name = "MToon_unversioned"
+            # mat = bpy.data.materials['meebit_16734_t']
+            # Possibly init the material
+            #for node in mat.node_tree.nodes:
+            #    if node.type != "OUTPUT_MATERIAL":
+            #        mat.node_tree.nodes.remove(node)
+
+            # Change shader type
+            mat = bpy.data.materials[name]
+            mat.use_nodes = True
+            node_group = mat.node_tree.nodes.new("ShaderNodeGroup")
+            try:
+                # Will throw exception if VRM add-on is not installed
+                node_group.node_tree = bpy.data.node_groups[shader_node_group_name]
+
+                mat.node_tree.links.new(
+                    mat.node_tree.nodes["Material Output"].inputs["Surface"],
+                    node_group.outputs["Emission"],
+                )
+
+                # Link Texture image 
+                #node_texture = mat.node_tree.nodes.new(type='ShaderNodeTexImage')
+                #node_texture.image =bpy.data.images["meebit_16734_t_col"]
+
+                mat.node_tree.links.new(
+                    col_tex.outputs["Color"],
+                    mat.node_tree.nodes["Group"].inputs["MainTexture"],
+                ) 
+                
+                # Correct ShadeColor
+                mat.node_tree.nodes["Group"].inputs["ShadeColor"].default_value=[0.1,0.1,0.1,1]   
+            except (RuntimeError, KeyError) as ex:
+                error_report = "\n".join(ex.args)
+                print(error_report)
+                print("MToon_unversioned shader missing. Install VRM add-on from https://github.com/saturday06/VRM_Addon_for_Blender and restart")
+                options.report({"WARNING"}, "MToon_unversioned shader missing. Install VRM add-on from https://github.com/saturday06/VRM_Addon_for_Blender")
+                return {"CANCELLED"}
+            pass
+        
     
     
     ### Apply Transforms ##
