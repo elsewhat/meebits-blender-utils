@@ -1,0 +1,2 @@
+blender MeebitRig.blend --background --python meebit_export_to_fbx.py -- --meebit c:\meebits\14544\meebit_14544_t.vox
+blender MeebitRig.blend --background --python meebit_export_to_vrm.py -- --meebit c:\meebits\14544\meebit_14544_t.vox

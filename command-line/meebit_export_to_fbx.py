@@ -100,7 +100,10 @@ print(meebitPath)
 
 options=MeebitImportOption()
 options.voxel_size=.025
-options.material_type='Tex'
+options.optimize_import_for_type='VRM'
+#options.material_type='Tex'
+options.mtoon_shader= True
+options.shade_smooth_meebit= True
 options.gamma_correct= True
 options.gamma_value= 2.2
 options.override_materials = False
