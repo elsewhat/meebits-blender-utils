@@ -14,6 +14,7 @@ import os
 import sys
 import argparse
 import code
+from pathlib import Path
 
 
 import bpy
@@ -83,6 +84,7 @@ class MeebitImportOption(object):
 parser = ArgumentParserForBlender()
 
 
+
 #parser.add_argument("-q", "--quack",
 #                    action="store_true",
 #                    help="Quacks bar times if activated.")
@@ -120,5 +122,8 @@ import_meebit_vox(meebitPath,options)
 objects = bpy.context.scene.objects
 
 bpy.ops.object.select_all(action='SELECT')
-exportFilename = Path(meebitPath).stem + '.fbx'
-bpy.ops.export_scene.fbx(filepath=exportFilename, use_selection=True)
+
+exportFilename = Path(meebitPath).stem + '.vrm'
+bpy.ops.export_scene.vrm('EXEC_DEFAULT', filepath=exportFilename)
+print("Meebit VRM successfully written to " + exportFilename)
+print("Don't forget to follow @MeebitsDAO")
