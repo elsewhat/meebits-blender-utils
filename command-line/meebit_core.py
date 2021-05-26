@@ -57,7 +57,7 @@ class VoxelObject:
         return True
     
     # TODO: Refactor this central method
-    def generate(self, file_name, vox_size, material_type, palette, materials, cleanup, collections,meebit_rig,scale_meebit_rig):
+    def generate(self, file_name, vox_size, material_type, palette, materials, cleanup, collections,meebit_rig,scale_meebit_rig,shade_smooth_meebit):
         objects = []
         lights = []
         
@@ -239,6 +239,14 @@ class VoxelObject:
         bpy.ops.transform.translate(value=(self.position.x*vox_size, self.position.y*vox_size, self.position.z*vox_size))
         bpy.ops.transform.resize(value=(vox_size, vox_size, vox_size))
         
+        if shade_smooth_meebit:
+            print("Applying shade smooth")
+            # Each faces must be smooth shaded https://blender.stackexchange.com/a/91687
+            mesh = obj.data
+            obj.data.use_auto_smooth = 1
+            for f in mesh.polygons:
+                f.use_smooth = True
+
         # Cleanup Mesh
         if cleanup:
             bpy.ops.object.editmode_toggle()
@@ -314,6 +322,11 @@ def read_dict(content):
 
 def import_meebit_vox(path, options):
     
+    if options.optimize_import_for_type == 'Blender':
+        options.material_type = 'SepMat'
+    elif options.optimize_import_for_type == 'VRM':
+        options.material_type = 'Tex'
+
     with open(path, 'rb') as file:
         file_name = os.path.basename(file.name).replace('.vox', '')
         file_size = os.path.getsize(path)
@@ -577,6 +590,60 @@ def import_meebit_vox(path, options):
             links.new(col_tex.outputs["Color"], bsdf.inputs["Emission"])
             links.new(mat_tex.outputs["Alpha"], multiply.inputs[0])
             links.new(multiply.outputs[0], bsdf.inputs["Emission Strength"])
+
+            # Meebit - Pack these images so that they're part of the blender scene and not lost on reopen
+            # https://github.com/elsewhat/meebits-blender-utils/issues/10
+            # https://blender.stackexchange.com/questions/142888/how-to-pack-data-into-blend-with-bpy-data-libraries-write
+            print("Packing image " + name + '_col' + " into blender file")
+            bpy.data.images[name + '_col'].pack()
+            print("Packing image " + name + '_mat' + " into blender file")
+            # This does not have the effect we want as it loose data on persistence 
+            bpy.data.images[name + '_mat'].pack()
+
+        # Ref https://github.com/elsewhat/meebits-blender-utils/issues/12
+        # Might have done this whilst creating the material as well. But now if this fails, the default material should be ok
+        if options.mtoon_shader:
+            print("Applying MToon_unversioned shader to meebit material")
+
+            shader_node_group_name = "MToon_unversioned"
+            # mat = bpy.data.materials['meebit_16734_t']
+            # Possibly init the material
+            #for node in mat.node_tree.nodes:
+            #    if node.type != "OUTPUT_MATERIAL":
+            #        mat.node_tree.nodes.remove(node)
+
+            # Change shader type
+            mat = bpy.data.materials[name]
+            mat.use_nodes = True
+            node_group = mat.node_tree.nodes.new("ShaderNodeGroup")
+            try:
+                # Will throw exception if VRM add-on is not installed
+                node_group.node_tree = bpy.data.node_groups[shader_node_group_name]
+
+                mat.node_tree.links.new(
+                    mat.node_tree.nodes["Material Output"].inputs["Surface"],
+                    node_group.outputs["Emission"],
+                )
+
+                # Link Texture image 
+                #node_texture = mat.node_tree.nodes.new(type='ShaderNodeTexImage')
+                #node_texture.image =bpy.data.images["meebit_16734_t_col"]
+
+                mat.node_tree.links.new(
+                    col_tex.outputs["Color"],
+                    mat.node_tree.nodes["Group"].inputs["MainTexture"],
+                ) 
+                
+                # Correct ShadeColor
+                mat.node_tree.nodes["Group"].inputs["ShadeColor"].default_value=[0.1,0.1,0.1,1]   
+            except (RuntimeError, KeyError) as ex:
+                error_report = "\n".join(ex.args)
+                print(error_report)
+                print("MToon_unversioned shader missing. Install VRM add-on from https://github.com/saturday06/VRM_Addon_for_Blender and restart")
+                options.report({"WARNING"}, "MToon_unversioned shader missing. Install VRM add-on from https://github.com/saturday06/VRM_Addon_for_Blender")
+                return {"CANCELLED"}
+            pass
+        
     
     
     ### Apply Transforms ##
@@ -619,4 +686,4 @@ def import_meebit_vox(path, options):
     
     ### Generate Objects ###
     for model in models.values():
-        model.generate(file_name, options.voxel_size, options.material_type, palette, materials, options.cleanup_mesh, collections, options.join_meebit_armature,options.scale_meebit_armature)
+        model.generate(file_name, options.voxel_size, options.material_type, palette, materials, options.cleanup_mesh, collections, options.join_meebit_armature,options.scale_meebit_armature,options.shade_smooth_meebit)
