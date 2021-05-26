@@ -42,23 +42,22 @@ class VoxelObject:
             if vox[3] not in self.used_colors:
                 self.used_colors.append(vox[3])
         # Loop over identified voxels and determine which faces have neighboring voxels.
-        for vox in self.voxels:
-            if vox:
-                pos, colID,neighbors = vox
-                if self.voxels[Vec3(pos.x+1,pos.y,pos.z)._index()]:
-                    neighbors[0]=True
-                if self.voxels[Vec3(pos.x,pos.y+1,pos.z)._index()]:
-                    neighbors[1]=True
-                if self.voxels[Vec3(pos.x,pos.y,pos.z+1)._index()]:
-                    neighbors[2]=True
-                if self.voxels[Vec3(pos.x-1,pos.y,pos.z)._index()]:
-                    neighbors[3]=True
-                if self.voxels[Vec3(pos.x,pos.y-1,pos.z)._index()]:
-                    neighbors[4]=True
-                if self.voxels[Vec3(pos.x,pos.y,pos.z-1)._index()]:
-                    neighbors[5]=True
-                # Tuples are immutable, so overwrite old one
-                self.voxels[pos._index()] = (pos,colID,neighbors)
+        for key in self.voxels:
+            pos, colID,neighbors = self.voxels[key]
+            if Vec3(pos.x+1,pos.y,pos.z)._index() in self.voxels:
+                neighbors[0]=True
+            if Vec3(pos.x,pos.y+1,pos.z)._index() in self.voxels:
+                neighbors[1]=True
+            if Vec3(pos.x,pos.y,pos.z+1)._index() in self.voxels:
+                neighbors[2]=True
+            if Vec3(pos.x-1,pos.y,pos.z)._index() in self.voxels:
+                neighbors[3]=True
+            if Vec3(pos.x,pos.y-1,pos.z)._index() in self.voxels:
+                neighbors[4]=True
+            if Vec3(pos.x,pos.y,pos.z-1)._index() in self.voxels:
+                neighbors[5]=True
+            # Tuples are immutable, so overwrite old one
+            self.voxels[key] = (pos,colID,neighbors)
 
     
     def getVox(self, pos):
@@ -87,6 +86,8 @@ class VoxelObject:
         if len(self.used_colors) == 0: # Empty Object
             return
         
+        print ("remove_interior_faces: %i" %remove_interior_faces)
+
         for Col in self.used_colors: # Create an object for each color and then join them.
             
             mesh = bpy.data.meshes.new(file_name) # Create mesh
@@ -112,19 +113,26 @@ class VoxelObject:
             verts = []
             faces = []
             
+            facesSkipped = 0
+            facesNotSkipped = 0
+
             for key in self.voxels:
                 pos, colID,neighbors = self.voxels[key]
                 x, y, z = pos.x, pos.y, pos.z
                 
+                
+                
                 if colID != Col:
                     continue
                 
+                print ("Neighbors: %r %r %r %r %r %r"%(neighbors[0], neighbors[1],neighbors[2], neighbors[3],neighbors[4],neighbors[5]))
                 # Lights
                 if light_col != None and materials[Col-1][3] > 0:
                     light_obj = bpy.data.objects.new(name=file_name+"_"+str(Col), object_data=light_data)
                     light_obj.location = (x+0.5, y+0.5,z+0.5)  # Set location to center of voxel.
                     light_col.objects.link(light_obj)
                     lights.append(light_obj)
+                
                 
                             
                 if not self.compareVox(colID, Vec3(x+1, y, z)):
@@ -133,11 +141,16 @@ class VoxelObject:
                     verts.append( (x+1, y+1, z+1) )
                     verts.append( (x+1, y, z+1) )
                     
-                    if remove_interior_faces==False or neighbors[0]==False:
+                    if remove_interior_faces==True and neighbors[0]==True:
+                        facesSkipped+=1 
+                    else:
+                        print ("Skipping remove_interior_faces==%r and neighbors[0]==%r"%(remove_interior_faces,neighbors[0]))
+                        facesNotSkipped+=1
                         faces.append( [len(verts)-4,
                                     len(verts)-3,
                                     len(verts)-2,
                                     len(verts)-1] )
+                        
                 
                 if not self.compareVox(colID, Vec3(x, y+1, z)):
                     verts.append( (x+1, y+1, z) )
@@ -145,11 +158,15 @@ class VoxelObject:
                     verts.append( (x, y+1, z+1) )
                     verts.append( (x, y+1, z) )
                     
-                    if remove_interior_faces==False or neighbors[1]==False:
+                    if remove_interior_faces==True and neighbors[1]==True:
+                        facesSkipped+=1
+                    else:
+                        facesNotSkipped+=1
                         faces.append( [len(verts)-4,
                                     len(verts)-3,
                                     len(verts)-2,
                                     len(verts)-1] )
+                                                         
                 
                 if not self.compareVox(colID, Vec3(x, y, z+1)):
                     verts.append( (x, y, z+1) )
@@ -157,11 +174,14 @@ class VoxelObject:
                     verts.append( (x+1, y+1, z+1) )
                     verts.append( (x+1, y, z+1) )
                     
-                    if remove_interior_faces==False or neighbors[2]==False:
+                    if remove_interior_faces==True and neighbors[2]==True:
+                        facesSkipped+=1
+                    else:
+                        facesNotSkipped+=1
                         faces.append( [len(verts)-4,
                                     len(verts)-3,
                                     len(verts)-2,
-                                    len(verts)-1] )
+                                    len(verts)-1] )                                  
                 
                 if not self.compareVox(colID, Vec3(x-1, y, z)):
                     verts.append( (x, y, z) )
@@ -169,11 +189,14 @@ class VoxelObject:
                     verts.append( (x, y+1, z+1) )
                     verts.append( (x, y, z+1) )
                     
-                    if remove_interior_faces==False or neighbors[3]==False:
+                    if remove_interior_faces==True and neighbors[3]==True:
+                        facesSkipped+=1
+                    else:
+                        facesNotSkipped+=1
                         faces.append( [len(verts)-4,
                                     len(verts)-3,
                                     len(verts)-2,
-                                    len(verts)-1] )
+                                    len(verts)-1] )                                   
                 
                 if not self.compareVox(colID, Vec3(x, y-1, z)):
                     verts.append( (x, y, z) )
@@ -181,11 +204,14 @@ class VoxelObject:
                     verts.append( (x+1, y, z+1) )
                     verts.append( (x+1, y, z) )
                     
-                    if remove_interior_faces==False or neighbors[4]==False:
+                    if remove_interior_faces==True and neighbors[4]==True:
+                        facesSkipped+=1
+                    else:
+                        facesNotSkipped+=1
                         faces.append( [len(verts)-4,
                                     len(verts)-3,
                                     len(verts)-2,
-                                    len(verts)-1] )
+                                    len(verts)-1] )                                  
                 
                 if not self.compareVox(colID, Vec3(x, y, z-1)):
                     verts.append( (x, y, z) )
@@ -193,11 +219,17 @@ class VoxelObject:
                     verts.append( (x+1, y+1, z) )
                     verts.append( (x, y+1, z) )
                     
-                    if remove_interior_faces==False or neighbors[5]==False:
+                    if remove_interior_faces==True and neighbors[5]==True:
+                        facesSkipped+=1
+                    else:
+                        facesNotSkipped+=1
                         faces.append( [len(verts)-4,
                                     len(verts)-3,
                                     len(verts)-2,
                                     len(verts)-1] )
+
+            print ("facesSkipped: %i" %facesSkipped)                                   
+            print ("facesNotSkipped: %i" %facesNotSkipped)   
                                         
             mesh.from_pydata(verts, [], faces)
             
