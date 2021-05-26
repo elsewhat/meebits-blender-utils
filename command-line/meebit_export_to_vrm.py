@@ -5,7 +5,7 @@ It uses code from the following repo under gpl 3.0 license.
 https://github.com/technistguru/MagicaVoxel_Importer
 
 Usage:
-blender MeebitRig.blend --background --python meebit_export_to_fbx.py -- --meebit E:\meebits\14544\meebit_14544_t.vox
+blender MeebitRig.blend --background --python meebit_export_to_vrm.py -- --meebit E:\meebits\14544\meebit_14544_t.vox
 """
 
 # Debug tips. Shift+F4 for python console .  obj = bpy.data.objects['meebit_16734_t'] to get object
