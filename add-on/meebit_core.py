@@ -36,11 +36,30 @@ class VoxelObject:
         for vox in Voxels:
             #              x       y       z
             pos = Vec3(vox[0], vox[1], vox[2])
-            self.voxels[pos._index()] = (pos, vox[3])
+            # Last param represent if the voxel has neigbhoring voxel for that faces
+            self.voxels[pos._index()] = (pos, vox[3],[False,False,False,False,False,False])
             
             if vox[3] not in self.used_colors:
                 self.used_colors.append(vox[3])
-            
+        # Loop over identified voxels and determine which faces have neighboring voxels.
+        for vox in self.voxels:
+            if vox:
+                pos, colID,neighbors = vox
+                if self.voxels[Vec3(pos.x+1,pos.y,pos.z)._index()]:
+                    neighbors[0]=True
+                if self.voxels[Vec3(pos.x,pos.y+1,pos.z)._index()]:
+                    neighbors[1]=True
+                if self.voxels[Vec3(pos.x,pos.y,pos.z+1)._index()]:
+                    neighbors[2]=True
+                if self.voxels[Vec3(pos.x-1,pos.y,pos.z)._index()]:
+                    neighbors[3]=True
+                if self.voxels[Vec3(pos.x,pos.y-1,pos.z)._index()]:
+                    neighbors[4]=True
+                if self.voxels[Vec3(pos.x,pos.y,pos.z-1)._index()]:
+                    neighbors[5]=True
+                # Tuples are immutable, so overwrite old one
+                self.voxels[pos._index()] = (pos,colID,neighbors)
+
     
     def getVox(self, pos):
         key = pos._index()
@@ -57,7 +76,7 @@ class VoxelObject:
         return True
     
     # TODO: Refactor this central method
-    def generate(self, file_name, vox_size, material_type, palette, materials, cleanup, collections,meebit_rig,scale_meebit_rig,shade_smooth_meebit):
+    def generate(self, file_name, vox_size, material_type, palette, materials, cleanup, collections,meebit_rig,scale_meebit_rig,shade_smooth_meebit,remove_interior_faces):
         objects = []
         lights = []
         
@@ -94,7 +113,7 @@ class VoxelObject:
             faces = []
             
             for key in self.voxels:
-                pos, colID = self.voxels[key]
+                pos, colID,neighbors = self.voxels[key]
                 x, y, z = pos.x, pos.y, pos.z
                 
                 if colID != Col:
@@ -114,7 +133,8 @@ class VoxelObject:
                     verts.append( (x+1, y+1, z+1) )
                     verts.append( (x+1, y, z+1) )
                     
-                    faces.append( [len(verts)-4,
+                    if remove_interior_faces==False or neighbors[0]==False:
+                        faces.append( [len(verts)-4,
                                     len(verts)-3,
                                     len(verts)-2,
                                     len(verts)-1] )
@@ -125,7 +145,8 @@ class VoxelObject:
                     verts.append( (x, y+1, z+1) )
                     verts.append( (x, y+1, z) )
                     
-                    faces.append( [len(verts)-4,
+                    if remove_interior_faces==False or neighbors[1]==False:
+                        faces.append( [len(verts)-4,
                                     len(verts)-3,
                                     len(verts)-2,
                                     len(verts)-1] )
@@ -136,7 +157,8 @@ class VoxelObject:
                     verts.append( (x+1, y+1, z+1) )
                     verts.append( (x+1, y, z+1) )
                     
-                    faces.append( [len(verts)-4,
+                    if remove_interior_faces==False or neighbors[2]==False:
+                        faces.append( [len(verts)-4,
                                     len(verts)-3,
                                     len(verts)-2,
                                     len(verts)-1] )
@@ -147,7 +169,8 @@ class VoxelObject:
                     verts.append( (x, y+1, z+1) )
                     verts.append( (x, y, z+1) )
                     
-                    faces.append( [len(verts)-4,
+                    if remove_interior_faces==False or neighbors[3]==False:
+                        faces.append( [len(verts)-4,
                                     len(verts)-3,
                                     len(verts)-2,
                                     len(verts)-1] )
@@ -158,7 +181,8 @@ class VoxelObject:
                     verts.append( (x+1, y, z+1) )
                     verts.append( (x+1, y, z) )
                     
-                    faces.append( [len(verts)-4,
+                    if remove_interior_faces==False or neighbors[4]==False:
+                        faces.append( [len(verts)-4,
                                     len(verts)-3,
                                     len(verts)-2,
                                     len(verts)-1] )
@@ -169,7 +193,8 @@ class VoxelObject:
                     verts.append( (x+1, y+1, z) )
                     verts.append( (x, y+1, z) )
                     
-                    faces.append( [len(verts)-4,
+                    if remove_interior_faces==False or neighbors[5]==False:
+                        faces.append( [len(verts)-4,
                                     len(verts)-3,
                                     len(verts)-2,
                                     len(verts)-1] )
@@ -686,4 +711,4 @@ def import_meebit_vox(path, options):
     
     ### Generate Objects ###
     for model in models.values():
-        model.generate(file_name, options.voxel_size, options.material_type, palette, materials, options.cleanup_mesh, collections, options.join_meebit_armature,options.scale_meebit_armature,options.shade_smooth_meebit)
+        model.generate(file_name, options.voxel_size, options.material_type, palette, materials, options.cleanup_mesh, collections, options.join_meebit_armature,options.scale_meebit_armature,options.shade_smooth_meebit, options.remove_interior_faces)

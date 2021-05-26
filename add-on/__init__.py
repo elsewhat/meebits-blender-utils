@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Meebit (.vox)",
     "author": "Dagfinn Parnas based on technistguru/MagicaVoxel_Importer",
-    "version": (0, 9, 1),
+    "version": (0, 9, 2),
     "blender": (2, 80, 0),
     "location": "File > Import-Export",
     "description": "Import Meebit from .vox file",
@@ -92,7 +92,9 @@ class ImportMeebit(Operator, ImportHelper):
                             description = "Automatically set a shader which can be used for VRM format",
                             default = True)                               
 
-    override_materials: BoolProperty(name = "Override materials if they exist", default = False)                            
+    override_materials: BoolProperty(name = "Override materials if they exist", default = False)
+
+    remove_interior_faces: BoolProperty(name = "Remove interior faces", default = False)                                       
 
     # Not used directly
     voxel_size: FloatProperty(name = "Voxel Size",
@@ -202,6 +204,8 @@ class ImportMeebit(Operator, ImportHelper):
         #layout.prop(self, "create_volume")
         
         secondary_options.prop(self, "override_materials")
+        secondary_options.prop(self, "remove_interior_faces")
+        
 
 
 def menu_func_import(self, context):
