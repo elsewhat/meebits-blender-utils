@@ -59,7 +59,7 @@ class VoxelObject:
             # Tuples are immutable, so overwrite old one
             self.voxels[key] = (pos,colID,neighbors)
 
-    
+    # Gets the color of the voxel. 0 if no voxel exist for position pos
     def getVox(self, pos):
         key = pos._index()
         if key in self.voxels:
@@ -67,6 +67,7 @@ class VoxelObject:
         
         return 0
     
+    # Returns true if a voxel exist for pos b (colA is not used )
     def compareVox(self, colA, b):
         colB = self.getVox(b)
         
@@ -87,6 +88,13 @@ class VoxelObject:
             return
         
         print ("remove_interior_faces: %i" %remove_interior_faces)
+
+        # Reverse engineered logic
+        # Loop through all colors found in model
+        #    Loop through all voxels
+        #       if voxel color = current color
+        #        
+
 
         for Col in self.used_colors: # Create an object for each color and then join them.
             
@@ -125,7 +133,7 @@ class VoxelObject:
                 if colID != Col:
                     continue
                 
-                print ("Neighbors: %r %r %r %r %r %r"%(neighbors[0], neighbors[1],neighbors[2], neighbors[3],neighbors[4],neighbors[5]))
+                #print ("Neighbors: %r %r %r %r %r %r"%(neighbors[0], neighbors[1],neighbors[2], neighbors[3],neighbors[4],neighbors[5]))
                 # Lights
                 if light_col != None and materials[Col-1][3] > 0:
                     light_obj = bpy.data.objects.new(name=file_name+"_"+str(Col), object_data=light_data)
@@ -134,7 +142,7 @@ class VoxelObject:
                     lights.append(light_obj)
                 
                 
-                            
+                # compareVox returns 0 if there is no voxel in the given position. So this will only be executed if there is no voxel adjacent to this direction            
                 if not self.compareVox(colID, Vec3(x+1, y, z)):
                     verts.append( (x+1, y, z) )
                     verts.append( (x+1, y+1, z) )
@@ -152,7 +160,7 @@ class VoxelObject:
                                     len(verts)-1] )
                         
                 
-                if not self.compareVox(colID, Vec3(x, y+1, z)):
+                if (not self.compareVox(colID, Vec3(x, y+1, z))) and (not self.compareVox(colID, Vec3(x, y+2, z))) and (not self.compareVox(colID, Vec3(x, y+3, z))) :
                     verts.append( (x+1, y+1, z) )
                     verts.append( (x+1, y+1, z+1) )
                     verts.append( (x, y+1, z+1) )
@@ -168,7 +176,7 @@ class VoxelObject:
                                     len(verts)-1] )
                                                          
                 
-                if not self.compareVox(colID, Vec3(x, y, z+1)):
+                if (not self.compareVox(colID, Vec3(x, y, z+1))) and (not self.compareVox(colID, Vec3(x, y, z+2))) and (not self.compareVox(colID, Vec3(x, y, z+3))) :
                     verts.append( (x, y, z+1) )
                     verts.append( (x, y+1, z+1) )
                     verts.append( (x+1, y+1, z+1) )
@@ -198,7 +206,7 @@ class VoxelObject:
                                     len(verts)-2,
                                     len(verts)-1] )                                   
                 
-                if not self.compareVox(colID, Vec3(x, y-1, z)):
+                if (not self.compareVox(colID, Vec3(x, y-1, z))) and (not self.compareVox(colID, Vec3(x, y-2, z))) and (not self.compareVox(colID, Vec3(x, y-3, z))) :
                     verts.append( (x, y, z) )
                     verts.append( (x, y, z+1) )
                     verts.append( (x+1, y, z+1) )
@@ -213,7 +221,7 @@ class VoxelObject:
                                     len(verts)-2,
                                     len(verts)-1] )                                  
                 
-                if not self.compareVox(colID, Vec3(x, y, z-1)):
+                if (not self.compareVox(colID, Vec3(x, y, z-1))) and (not self.compareVox(colID, Vec3(x, y, z-2))) and (not self.compareVox(colID, Vec3(x, y, z-3))) :
                     verts.append( (x, y, z) )
                     verts.append( (x+1, y, z) )
                     verts.append( (x+1, y+1, z) )
