@@ -14,6 +14,14 @@ import bpy
 
 import struct
 
+
+class FaceSuppressRule:
+    def __init__(self, isPosAffectedMethod, suppressXFace, suppressNegXFace,suppressYFace, suppressNegYFace,suppressZFace, suppressNegZFace):
+        self.isPosAffectedMethod, self.suppressXFace, self.suppressNegXFace,self.suppressYFace, self.suppressNegYFace,self.suppressZFace, self.suppressNegZFace = isPosAffectedMethod, suppressXFace, suppressNegXFace,suppressYFace, suppressNegYFace,suppressZFace, suppressNegZFace
+
+    def isPosAffected(self,pos):
+        return self.isPosAffectedMethod(pos)
+    
 # Represent a Voxel vector     
 class Vec3:
     def __init__(self, X, Y, Z):
@@ -58,6 +66,10 @@ class VoxelObject:
                 neighbors[5]=True
             # Tuples are immutable, so overwrite old one
             self.voxels[key] = (pos,colID,neighbors)
+
+        self.face_suppress_rules = []; 
+        self.append(FaceSuppressRule( lambda pos: (True) if pos.x > 50 else (False), True,False,False,False,False,False))
+        
 
     # Gets the color of the voxel. 0 if no voxel exist for position pos
     def getVox(self, pos):
@@ -141,7 +153,9 @@ class VoxelObject:
                     light_col.objects.link(light_obj)
                     lights.append(light_obj)
                 
-                # compareVox returns 0 if there is no voxel in the given position. So this will only be executed if there is no voxel adjacent to this direction            
+                
+
+
                 if not self.compareVox(colID, Vec3(x+1, y, z)):
                     verts.append( (x+1, y, z) )
                     verts.append( (x+1, y+1, z) )
@@ -152,46 +166,28 @@ class VoxelObject:
                                     len(verts)-3,
                                     len(verts)-2,
                                     len(verts)-1] )
-                        
                 
                 if not self.compareVox(colID, Vec3(x, y+1, z)):
-                    do_add_face=True
-                    if remove_interior_faces:
-                        for i in range(2,8):
-                            if self.compareVox(colID, Vec3(x, y+i, z)):
-                                do_add_face = False
-                                break
-
-                    if do_add_face:
-                        verts.append( (x+1, y+1, z) )
-                        verts.append( (x+1, y+1, z+1) )
-                        verts.append( (x, y+1, z+1) )
-                        verts.append( (x, y+1, z) )
-                        
-                        faces.append( [len(verts)-4,
-                                        len(verts)-3,
-                                        len(verts)-2,
-                                        len(verts)-1] )
-                                                         
+                    verts.append( (x+1, y+1, z) )
+                    verts.append( (x+1, y+1, z+1) )
+                    verts.append( (x, y+1, z+1) )
+                    verts.append( (x, y+1, z) )
+                    
+                    faces.append( [len(verts)-4,
+                                    len(verts)-3,
+                                    len(verts)-2,
+                                    len(verts)-1] )
                 
-                if not self.compareVox(colID, Vec3(x, y, z+1)) :
-                    do_add_face=True
-                    if remove_interior_faces:
-                        for i in range(2,4):
-                            if self.compareVox(colID, Vec3(x, y, z+i)):
-                                do_add_face = False
-                                break
-
-                    if do_add_face:        
-                        verts.append( (x, y, z+1) )
-                        verts.append( (x, y+1, z+1) )
-                        verts.append( (x+1, y+1, z+1) )
-                        verts.append( (x+1, y, z+1) )
-                        
-                        faces.append( [len(verts)-4,
-                                        len(verts)-3,
-                                        len(verts)-2,
-                                        len(verts)-1] )                                  
+                if not self.compareVox(colID, Vec3(x, y, z+1)):
+                    verts.append( (x, y, z+1) )
+                    verts.append( (x, y+1, z+1) )
+                    verts.append( (x+1, y+1, z+1) )
+                    verts.append( (x+1, y, z+1) )
+                    
+                    faces.append( [len(verts)-4,
+                                    len(verts)-3,
+                                    len(verts)-2,
+                                    len(verts)-1] )
                 
                 if not self.compareVox(colID, Vec3(x-1, y, z)):
                     verts.append( (x, y, z) )
@@ -202,44 +198,29 @@ class VoxelObject:
                     faces.append( [len(verts)-4,
                                     len(verts)-3,
                                     len(verts)-2,
-                                    len(verts)-1] )                                   
+                                    len(verts)-1] )
                 
-                if not self.compareVox(colID, Vec3(x, y-1, z)) :
-                    do_add_face=True
-                    if remove_interior_faces:
-                        for i in range(2,8):
-                            if self.compareVox(colID, Vec3(x, y-i, z)):
-                                do_add_face = False
-                                break
-
-                    if do_add_face==True:
-                        verts.append( (x, y, z) )
-                        verts.append( (x, y, z+1) )
-                        verts.append( (x+1, y, z+1) )
-                        verts.append( (x+1, y, z) )
-                        
-                        faces.append( [len(verts)-4,
-                                        len(verts)-3,
-                                        len(verts)-2,
-                                        len(verts)-1] )                                  
+                if not self.compareVox(colID, Vec3(x, y-1, z)):
+                    verts.append( (x, y, z) )
+                    verts.append( (x, y, z+1) )
+                    verts.append( (x+1, y, z+1) )
+                    verts.append( (x+1, y, z) )
+                    
+                    faces.append( [len(verts)-4,
+                                    len(verts)-3,
+                                    len(verts)-2,
+                                    len(verts)-1] )
                 
                 if not self.compareVox(colID, Vec3(x, y, z-1)):
-                    do_add_face=True
-                    if remove_interior_faces:
-                        for i in range(2,4):
-                            if self.compareVox(colID, Vec3(x, y, z-i)):
-                                do_add_face = False
-                                break
-                    if do_add_face==True:                                                
-                        verts.append( (x, y, z) )
-                        verts.append( (x+1, y, z) )
-                        verts.append( (x+1, y+1, z) )
-                        verts.append( (x, y+1, z) )
-                        
-                        faces.append( [len(verts)-4,
-                                        len(verts)-3,
-                                        len(verts)-2,
-                                        len(verts)-1] )
+                    verts.append( (x, y, z) )
+                    verts.append( (x+1, y, z) )
+                    verts.append( (x+1, y+1, z) )
+                    verts.append( (x, y+1, z) )
+                    
+                    faces.append( [len(verts)-4,
+                                    len(verts)-3,
+                                    len(verts)-2,
+                                    len(verts)-1] )
 
             print ("facesSkipped: %i" %facesSkipped)                                   
             print ("facesNotSkipped: %i" %facesNotSkipped)   
