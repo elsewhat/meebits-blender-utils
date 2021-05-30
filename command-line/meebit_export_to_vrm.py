@@ -115,6 +115,7 @@ options.join_meebit_armature=True
 options.scale_meebit_armature= True
 options.organize=True
 options.create_volume=False
+options.remove_interior_faces=True
 
 import_meebit_vox(meebitPath,options)
 
