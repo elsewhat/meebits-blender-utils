@@ -16,8 +16,10 @@ import struct
 
 
 class FaceSuppressRule:
-    def __init__(self, isPosAffectedMethod, suppressXFace, suppressNegXFace,suppressYFace, suppressNegYFace,suppressZFace, suppressNegZFace):
-        self.isPosAffectedMethod, self.suppressXFace, self.suppressNegXFace,self.suppressYFace, self.suppressNegYFace,self.suppressZFace, self.suppressNegZFace = isPosAffectedMethod, suppressXFace, suppressNegXFace,suppressYFace, suppressNegYFace,suppressZFace, suppressNegZFace
+    def __init__(self, ruleName,isPosAffectedMethod, suppressXFace, suppressNegXFace,suppressYFace, suppressNegYFace,suppressZFace, suppressNegZFace):
+        self.ruleName,self.isPosAffectedMethod, self.suppressXFace, self.suppressNegXFace,self.suppressYFace, self.suppressNegYFace,self.suppressZFace, self.suppressNegZFace = ruleName,isPosAffectedMethod, suppressXFace, suppressNegXFace,suppressYFace, suppressNegYFace,suppressZFace, suppressNegZFace
+        self.facesSuppressed=0
+        self.isCombinedRule=False
 
     def isPosAffected(self,pos):
         return self.isPosAffectedMethod(pos)
@@ -68,8 +70,34 @@ class VoxelObject:
             self.voxels[key] = (pos,colID,neighbors)
 
         self.face_suppress_rules = []; 
-        self.append(FaceSuppressRule( lambda pos: (True) if pos.x > 50 else (False), True,False,False,False,False,False))
+        # Rules
+        # Left/right defined by meebits point of view
+        # Boolean values are suppressXFace, suppressNegXFace,suppressYFace, suppressNegYFace,suppressZFace, suppressNegZFace
+        self.face_suppress_rules.append(FaceSuppressRule("Right arm front", lambda pos: (True) if pos.x >=4 and pos.x<=23 and pos.y>=7 and pos.y<=8 and pos.z>=43 and pos.z<=46  else (False), False,False,True,False,False,False))
+        self.face_suppress_rules.append(FaceSuppressRule("Right arm back", lambda pos: (True) if pos.x >=4 and pos.x<=23 and pos.y>=9 and pos.y<=10 and pos.z>=43 and pos.z<=46  else (False), False,False,False,True,False,False))
+        self.face_suppress_rules.append(FaceSuppressRule("Right arm top", lambda pos: (True) if pos.x >=4 and pos.x<=23 and pos.y>=7 and pos.y<=10 and pos.z>=45 and pos.z<=46  else (False), False,False,False,False,False,True))
+        self.face_suppress_rules.append(FaceSuppressRule("Right arm bottom", lambda pos: (True) if pos.x >=4 and pos.x<=23 and pos.y>=7 and pos.y<=10 and pos.z>=43 and pos.z<=43   else (False), False,False,False,False,True,False))
         
+        self.face_suppress_rules.append(FaceSuppressRule("Left arm front", lambda pos: (True) if pos.x >=34 and pos.x<=53 and pos.y>=7 and pos.y<=8 and pos.z>=43 and pos.z<=46  else (False), False,False,True,False,False,False))
+        self.face_suppress_rules.append(FaceSuppressRule("Left arm back", lambda pos: (True) if pos.x >=34 and pos.x<=53 and pos.y>=9 and pos.y<=10 and pos.z>=43 and pos.z<=46  else (False), False,False,False,True,False,False))
+        self.face_suppress_rules.append(FaceSuppressRule("Left arm top", lambda pos: (True) if pos.x >=34 and pos.x<=53 and pos.y>=7 and pos.y<=10 and pos.z>=45 and pos.z<=46  else (False), False,False,False,False,False,True))
+        self.face_suppress_rules.append(FaceSuppressRule("Left arm bottom", lambda pos: (True) if pos.x >=34 and pos.x<=53 and pos.y>=7 and pos.y<=10 and pos.z>=43 and pos.z<=43   else (False), False,False,False,False,True,False))
+
+        self.face_suppress_rules.append(FaceSuppressRule("Chest front", lambda pos: (True) if pos.x >=22 and pos.x<=35 and pos.y>=5 and pos.y<=6 and pos.z>=24 and pos.z<=45  else (False), False,False,True,False,False,False))
+        self.face_suppress_rules.append(FaceSuppressRule("Chest back", lambda pos: (True) if pos.x >=22 and pos.x<=35 and pos.y>=11 and pos.y<=12 and pos.z>=24 and pos.z<=45  else (False), False,False,False,True,False,False))
+        self.face_suppress_rules.append(FaceSuppressRule("Chest right", lambda pos: (True) if pos.x >=22 and pos.x<=23 and pos.y>=5 and pos.y<=12 and pos.z>=24 and pos.z<=45  else (False), True,False,False,False,False,False))
+        self.face_suppress_rules.append(FaceSuppressRule("Chest left", lambda pos: (True) if pos.x >=34 and pos.x<=35 and pos.y>=5 and pos.y<=12 and pos.z>=24 and pos.z<=45  else (False), False,True,False,False,False,False))
+        
+
+        self.face_suppress_rules.append(FaceSuppressRule("Hips front", lambda pos: (True) if pos.x >=22 and pos.x<=35 and pos.y>=6 and pos.y<=7 and pos.z>=20 and pos.z<=23  else (False), False,False,True,False,False,False))
+        self.face_suppress_rules.append(FaceSuppressRule("Hips back", lambda pos: (True) if pos.x >=22 and pos.x<=35 and pos.y>=10 and pos.y<=11 and pos.z>=20 and pos.z<=23  else (False), False,False,False,True,False,False))
+        self.face_suppress_rules.append(FaceSuppressRule("Hips right", lambda pos: (True) if pos.x >=22 and pos.x<=23 and pos.y>=6 and pos.y<=11 and pos.z>=20 and pos.z<=23  else (False), True,False,False,False,False,False))
+        self.face_suppress_rules.append(FaceSuppressRule("Hips left", lambda pos: (True) if pos.x >=34 and pos.x<=35 and pos.y>=6 and pos.y<=11 and pos.z>=20 and pos.z<=23  else (False), False,True,False,False,False,False))
+
+        #self.face_suppress_rules.append(FaceSuppressRule("Right leg front", lambda pos: (True) if pos.x >=22 and pos.x<=25 and pos.y>=6 and pos.y<=7 and pos.z>=4 and pos.z<=19  else (False), False,False,True,False,False,False))
+        #self.face_suppress_rules.append(FaceSuppressRule("Right leg back", lambda pos: (True) if pos.x >=22 and pos.x<=25 and pos.y>=8 and pos.y<=9 and pos.z>=4 and pos.z<=19  else (False), False,False,False,True,False,False))
+        #self.face_suppress_rules.append(FaceSuppressRule("Right leg right", lambda pos: (True) if pos.x >=22 and pos.x<=23 and pos.y>=6 and pos.y<=9 and pos.z>=4 and pos.z<=19  else (False), True,False,False,False,False,False))
+        #self.face_suppress_rules.append(FaceSuppressRule("Right leg left", lambda pos: (True) if pos.x >=24 and pos.x<=25 and pos.y>=6 and pos.y<=9 and pos.z>=4 and pos.z<=19  else (False), False,True,False,False,False,False))
 
     # Gets the color of the voxel. 0 if no voxel exist for position pos
     def getVox(self, pos):
@@ -145,6 +173,30 @@ class VoxelObject:
                 if colID != Col:
                     continue
                 
+                faceSupressRule = FaceSuppressRule("Default rule", lambda pos: False, False,False,False,False,False,False)
+
+                nrMatchingRules= 0
+                # Use this only to count suppress face count
+                combinedRules= []
+                for rule in self.face_suppress_rules:
+                    if rule.isPosAffected(pos):
+                        if nrMatchingRules>0:
+                            print(f'More than one matching rule for ({pos.x},{pos.y},{pos.z}) {faceSupressRule.ruleName} + {rule.ruleName}  ')
+                            faceSupressRule = FaceSuppressRule(f'Combined {faceSupressRule.ruleName} + {rule.ruleName}', lambda pos: False,
+                                rule.suppressXFace|faceSupressRule.suppressXFace, 
+                                rule.suppressNegXFace|faceSupressRule.suppressNegXFace,
+                                rule.suppressYFace|faceSupressRule.suppressYFace,
+                                rule.suppressNegYFace|faceSupressRule.suppressNegYFace,
+                                rule.suppressZFace|faceSupressRule.suppressZFace,
+                                rule.suppressNegZFace|faceSupressRule.suppressNegZFace)
+                            faceSupressRule.isCombinedRule=True
+                            combinedRules.append(rule)
+                        else:
+                            faceSupressRule = rule
+                            combinedRules.append(rule)
+                        nrMatchingRules += 1
+                        
+
                 #print ("Neighbors: %r %r %r %r %r %r"%(neighbors[0], neighbors[1],neighbors[2], neighbors[3],neighbors[4],neighbors[5]))
                 # Lights
                 if light_col != None and materials[Col-1][3] > 0:
@@ -156,75 +208,115 @@ class VoxelObject:
                 
 
 
-                if not self.compareVox(colID, Vec3(x+1, y, z)):
-                    verts.append( (x+1, y, z) )
-                    verts.append( (x+1, y+1, z) )
-                    verts.append( (x+1, y+1, z+1) )
-                    verts.append( (x+1, y, z+1) )
-                    
-                    faces.append( [len(verts)-4,
-                                    len(verts)-3,
-                                    len(verts)-2,
-                                    len(verts)-1] )
+                if not self.compareVox(colID, Vec3(x+1, y, z))  :
+                    if faceSupressRule.suppressXFace:
+                        if faceSupressRule.isCombinedRule:
+                            for rule in combinedRules:
+                               rule.facesSuppressed +=1 
+                        else:
+                            faceSupressRule.facesSuppressed +=1
+                    else:
+                        verts.append( (x+1, y, z) )
+                        verts.append( (x+1, y+1, z) )
+                        verts.append( (x+1, y+1, z+1) )
+                        verts.append( (x+1, y, z+1) )
+                        
+                        faces.append( [len(verts)-4,
+                                        len(verts)-3,
+                                        len(verts)-2,
+                                        len(verts)-1] )
                 
                 if not self.compareVox(colID, Vec3(x, y+1, z)):
-                    verts.append( (x+1, y+1, z) )
-                    verts.append( (x+1, y+1, z+1) )
-                    verts.append( (x, y+1, z+1) )
-                    verts.append( (x, y+1, z) )
-                    
-                    faces.append( [len(verts)-4,
-                                    len(verts)-3,
-                                    len(verts)-2,
-                                    len(verts)-1] )
+                    if faceSupressRule.suppressYFace:
+                        if faceSupressRule.isCombinedRule:
+                            for rule in combinedRules:
+                               rule.facesSuppressed +=1 
+                        else:
+                            faceSupressRule.facesSuppressed +=1
+                    else:
+                        verts.append( (x+1, y+1, z) )
+                        verts.append( (x+1, y+1, z+1) )
+                        verts.append( (x, y+1, z+1) )
+                        verts.append( (x, y+1, z) )
+                        
+                        faces.append( [len(verts)-4,
+                                        len(verts)-3,
+                                        len(verts)-2,
+                                        len(verts)-1] )
                 
-                if not self.compareVox(colID, Vec3(x, y, z+1)):
-                    verts.append( (x, y, z+1) )
-                    verts.append( (x, y+1, z+1) )
-                    verts.append( (x+1, y+1, z+1) )
-                    verts.append( (x+1, y, z+1) )
-                    
-                    faces.append( [len(verts)-4,
-                                    len(verts)-3,
-                                    len(verts)-2,
-                                    len(verts)-1] )
+                if not self.compareVox(colID, Vec3(x, y, z+1)) :
+                    if faceSupressRule.suppressZFace:
+                        if faceSupressRule.isCombinedRule:
+                            for rule in combinedRules:
+                               rule.facesSuppressed +=1 
+                        else:
+                            faceSupressRule.facesSuppressed +=1
+                    else:                    
+                        verts.append( (x, y, z+1) )
+                        verts.append( (x, y+1, z+1) )
+                        verts.append( (x+1, y+1, z+1) )
+                        verts.append( (x+1, y, z+1) )
+                        
+                        faces.append( [len(verts)-4,
+                                        len(verts)-3,
+                                        len(verts)-2,
+                                        len(verts)-1] )
                 
-                if not self.compareVox(colID, Vec3(x-1, y, z)):
-                    verts.append( (x, y, z) )
-                    verts.append( (x, y+1, z) )
-                    verts.append( (x, y+1, z+1) )
-                    verts.append( (x, y, z+1) )
-                    
-                    faces.append( [len(verts)-4,
-                                    len(verts)-3,
-                                    len(verts)-2,
-                                    len(verts)-1] )
+                if not self.compareVox(colID, Vec3(x-1, y, z)) :
+                    if faceSupressRule.suppressNegXFace:
+                        if faceSupressRule.isCombinedRule:
+                            for rule in combinedRules:
+                               rule.facesSuppressed +=1 
+                        else:
+                            faceSupressRule.facesSuppressed +=1
+                    else:
+                        verts.append( (x, y, z) )
+                        verts.append( (x, y+1, z) )
+                        verts.append( (x, y+1, z+1) )
+                        verts.append( (x, y, z+1) )
+                        
+                        faces.append( [len(verts)-4,
+                                        len(verts)-3,
+                                        len(verts)-2,
+                                        len(verts)-1] )
                 
-                if not self.compareVox(colID, Vec3(x, y-1, z)):
-                    verts.append( (x, y, z) )
-                    verts.append( (x, y, z+1) )
-                    verts.append( (x+1, y, z+1) )
-                    verts.append( (x+1, y, z) )
-                    
-                    faces.append( [len(verts)-4,
-                                    len(verts)-3,
-                                    len(verts)-2,
-                                    len(verts)-1] )
+                if not self.compareVox(colID, Vec3(x, y-1, z)) :
+                    if faceSupressRule.suppressNegYFace:
+                        if faceSupressRule.isCombinedRule:
+                            for rule in combinedRules:
+                               rule.facesSuppressed +=1 
+                        else:
+                            faceSupressRule.facesSuppressed +=1
+                    else:
+                        verts.append( (x, y, z) )
+                        verts.append( (x, y, z+1) )
+                        verts.append( (x+1, y, z+1) )
+                        verts.append( (x+1, y, z) )
+                        
+                        faces.append( [len(verts)-4,
+                                        len(verts)-3,
+                                        len(verts)-2,
+                                        len(verts)-1] )
                 
-                if not self.compareVox(colID, Vec3(x, y, z-1)):
-                    verts.append( (x, y, z) )
-                    verts.append( (x+1, y, z) )
-                    verts.append( (x+1, y+1, z) )
-                    verts.append( (x, y+1, z) )
-                    
-                    faces.append( [len(verts)-4,
-                                    len(verts)-3,
-                                    len(verts)-2,
-                                    len(verts)-1] )
+                if not self.compareVox(colID, Vec3(x, y, z-1)) :
+                    if faceSupressRule.suppressNegZFace:
+                        if faceSupressRule.isCombinedRule:
+                            for rule in combinedRules:
+                               rule.facesSuppressed +=1 
+                        else:
+                            faceSupressRule.facesSuppressed +=1
+                    else:
+                        verts.append( (x, y, z) )
+                        verts.append( (x+1, y, z) )
+                        verts.append( (x+1, y+1, z) )
+                        verts.append( (x, y+1, z) )
+                        
+                        faces.append( [len(verts)-4,
+                                        len(verts)-3,
+                                        len(verts)-2,
+                                        len(verts)-1] )
 
-            print ("facesSkipped: %i" %facesSkipped)                                   
-            print ("facesNotSkipped: %i" %facesNotSkipped)   
-                                        
+
             mesh.from_pydata(verts, [], faces)
             
             if material_type == 'SepMat':
@@ -259,7 +351,9 @@ class VoxelObject:
                 for loop in obj.data.loops:
                     uv.data[loop.index].uv = [(Col-0.5)/256, 0.5]
                 
-        
+        for rule in self.face_suppress_rules:
+            print(f'{rule.ruleName} suppressed {rule.facesSuppressed} faces')
+
         bpy.ops.object.select_all(action='DESELECT')
         for obj in objects:
             obj.select_set(True) # Select all objects that were generated.
