@@ -16,3 +16,4 @@ Step 6.
 `docker cp meebit_17871_t_solid.vox 8b7b72e384aa:/meebits` - Copy local file to docker container (8b7b72e384aa is container id found in `docker ps`)
 
 `blender MeebitRig.blend --background --python meebit_export_to_vrm.py -- --meebit "/meebits/meebit_17871_t_solid.vox"` - Convert meebit if running in the image interactively
+`docker system prune -a --volumes` - Reclaim space
