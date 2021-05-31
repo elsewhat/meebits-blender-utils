@@ -6,8 +6,9 @@ Step 2: Copy your meebits meebit_xxx_t_solid.vox to meebits-blender-utils/docker
 Step 2: Open command prompt and navigate to directory meebits-blender-utils/docker
 Step 3: Build docker image with `docker build -t blender-meebits-v1 .`
 Step 4: Run the docker image interactively `docker run -it blender-meebits-v1`
-Step 5: Run `blender MeebitRig.blend --background --python meebit_export_to_vrm.py -- --meebit "/meebits/meebit_17871_t_solid.vox"` . Converted .vrm file will be in root folder /
-Step 6. 
+Step 5: In the container console, run `blender MeebitRig.blend --background --python meebit_export_to_vrm.py -- --meebit "/meebits/meebit_17871_t_solid.vox"` . Converted .vrm file will be in root folder /
+Step 6: Copy .vrm file to /output_vrm
+Step 7: Exit container console
 
 
 ## Useful commands
