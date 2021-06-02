@@ -6,6 +6,8 @@ Steps:
 1. Create directories containing the meebits to convert and the resulting vrm files C:\meebit_vrm_conversion\input_meebits and C:\meebit_vrm_conversion\output_vrm
 (feel free to change to different folder, but then the docker run command must be updated as well)
 1. Configure docker desktop to give access to files under C:\meebit_vrm_conversion\
+![image](https://user-images.githubusercontent.com/1133607/120553598-f5ea2280-c3f8-11eb-9505-dc7a080fb048.png)
+
 1. Copy your meebits meebit_xxx_t_solid.vox to meebits-blender-utils/docker/meebits
 1. Open command prompt and navigate to directory meebits-blender-utils/docker
 1.  Build docker image with `docker build -t blender-meebits-v1 .`
