@@ -1,4 +1,7 @@
 #!/bin/bash
-find /meebits/*solid.vox -maxdepth 1 -type f -exec blender MeebitRig.blend --background --python meebit_export_to_vrm.py -- --meebit "{}" \;
-echo "Moving VRM files to output_vrm/"
-mv *.vrm /output_vrm
+
+for meebit_file in /meebits/*solid.vox 
+do
+    blender MeebitRig.blend --background --python meebit_export_to_vrm.py -- --meebit $meebit_file
+    mv -f *.vrm output_vrm/
+done
