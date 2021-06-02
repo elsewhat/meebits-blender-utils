@@ -3,12 +3,15 @@ Provides access to convert meebits without installing blender locally
 
 Steps: 
 1. Install docker desktop https://docs.docker.com/get-docker/
+1. Create directories containing the meebits to convert and the resulting vrm files C:\meebit_vrm_conversion\input_meebits and C:\meebit_vrm_conversion\output_vrm
+(feel free to change to different folder, but then the docker run command must be updated as well)
+1. Configure docker desktop to give access to files under C:\meebit_vrm_conversion\
 1. Copy your meebits meebit_xxx_t_solid.vox to meebits-blender-utils/docker/meebits
 1. Open command prompt and navigate to directory meebits-blender-utils/docker
 1.  Build docker image with `docker build -t blender-meebits-v1 .`https://open.spotify.com/track/5VGlqQANWDKJFl0MBG3sg2
-1.  Run the docker image interactively `docker run -v C:\Users\dagfi\Documents\GitHub\meebits-blender-import\docker\output_vrm:/output_vrm -it blender-meebits-v1`
-1.  In the container console, run `blender MeebitRig.blend --background --python meebit_export_to_vrm.py -- --meebit "/meebits/meebit_17871_t_solid.vox"` . Converted .vrm file will be in root folder /
-1.  Copy .vrm file to /output_vrm
+1.  Run the docker image interactively `docker run -v C:\meebit_vrm_conversion\input_meebits:/meebits -v C:\meebit_vrm_conversion\output_vrm:/output_vrm  -it blender-meebits-v1`
+PS make sure the -v volume commands has full paths and not just a relative path
+1.  In the container console, run `./convert_all_meebits.sh"` . Converted .vrm file will end up in the /output_vrm folder mapped to C:\meebit_vrm_conversion\output_vrm
 1.  Exit container console
 
 
