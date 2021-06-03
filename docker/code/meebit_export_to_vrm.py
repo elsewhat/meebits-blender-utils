@@ -16,6 +16,8 @@ import argparse
 import code
 from pathlib import Path
 
+import requests
+import re
 
 import bpy
 
@@ -123,7 +125,43 @@ objects = bpy.context.scene.objects
 
 bpy.ops.object.select_all(action='SELECT')
 
-exportFilename = Path(meebitPath).stem + '.vrm'
+
+# Before exporting, let's set the VRM meta information ref 
+# https://github.com/vrm-c/vrm-specification/blob/master/specification/VRMC_vrm-1.0_draft/meta.md
+# https://vrm.dev/en/docs/univrm/meta/univrm_meta/
+fileNameNoEnding = (Path(meebitPath).stem)
+
+try:
+    # Expected value of fileNameNoEnding  = 'meebit_19666_t_solid'
+    meebitId = re.search('meebit_([^_]*)',fileNameNoEnding).group(1)
+    # Remove leading zeros
+    meebitId = meebitId.lstrip('0')
+    print(f'Meebit id from filename is {meebitId}')
+    # Do screenscraping from ll site for owner wallet
+    print(f'Making HTTP request to https://meebits.larvalabs.com/meebits/detail?index={meebitId}')
+    response = requests.get(f'https://meebits.larvalabs.com/meebits/detail?index={meebitId}')
+    ownerWallet = re.search('account.address=([^"]*)',response.text).group(1)
+
+    # Set these values in blender for the VRM export add-on to include them
+    meebitArmature = bpy.data.objects['MeebitArmature']
+    meebitArmature['version'] = '0.9.3'  # matches the meebit blender add-on version
+    meebitArmature['author'] = ownerWallet # wallet id for the owner when the VRM was created
+    meebitArmature['contactInformation'] = f'https://meebits.larvalabs.com/meebits/detail?index={meebitId}' # To be update to metaverse sign-up info
+    meebitArmature['reference'] = 'https://meebitsdao.world/' # meebits dao promotion
+    meebitArmature['title'] = f'Meebit #{meebitId}' # meebit number reference
+    meebitArmature['otherPermissionUrl'] = f'https://meebits.larvalabs.com/meebits/detail?index={meebitId}'  # meebit url
+    meebitArmature['otherLicenseUrl'] = 'https://meebits.larvalabs.com/meebits/termsandconditions' # meebits terms and conditions
+    # Leave default value of these for now
+    # meebitArmature['allowedUserName': 'OnlyAuthor']
+    # meebitArmature['violentUssageName': 'Disallow']
+    # meebitArmature['sexualUssageName': 'Disallow']
+    # meebitArmature['commercialUssageName': 'Disallow']
+    # meebitArmature['licenseName': 'Redistribution_Prohibited']
+except Exception as e:
+    print("Failed to set VRM metadata")
+    print(e)
+
+exportFilename = fileNameNoEnding+ '.vrm'
 bpy.ops.export_scene.vrm('EXEC_DEFAULT', filepath=exportFilename)
 print("Meebit VRM successfully written to " + exportFilename)
 print("Don't forget to follow @MeebitsDAO")
